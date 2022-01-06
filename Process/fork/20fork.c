@@ -15,7 +15,8 @@ int main(int argc, char const *argv[]) {
   int pids[PROCESS_NUM];
   int pipes[PROCESS_NUM + 1][2];
 
-  for (int i = 0; i < PROCESS_NUM; i++) {
+  int i;
+  for (i = 0; i < PROCESS_NUM + 1; i++) {
     if (pipe(pipes[i]) == -1) {
       printf("Error with creating pipe\n");
       return 1;
@@ -25,13 +26,14 @@ int main(int argc, char const *argv[]) {
   for (int i = 0; i < PROCESS_NUM; i++) {
     pids[i] = fork();
     if (pids[i] == -1) {
-      printf("Error with creating processes\n");
+      printf("Error with creating process\n");
       return 2;
     }
 
     if (pids[i] == 0) {
       // Child process
-      for (int j = 0; j < PROCESS_NUM + 1; j++) {
+      int j;
+      for (j = 0; j < PROCESS_NUM + 1; j++) {
         if (i != j) {
           close(pipes[j][0]);
         }
@@ -42,11 +44,11 @@ int main(int argc, char const *argv[]) {
 
       int x;
       if (read(pipes[i][0], &x, sizeof(int)) == -1) {
-        printf("Error at readinga\n");
+        printf("Error at reading\n");
         return 3;
       }
 
-      printf("(%d) got %d\n", i, x);
+      printf("(%d) Got %d\n", i, x);
 
       x++;
       if (write(pipes[i + 1][1], &x, sizeof(int)) == -1) {
@@ -54,7 +56,7 @@ int main(int argc, char const *argv[]) {
         return 4;
       }
 
-      printf("(%d) sent %d\n", i, x);
+      printf("(%d) Sent %d\n", i, x);
 
       close(pipes[i][0]);
       close(pipes[i + 1][1]);
@@ -63,7 +65,8 @@ int main(int argc, char const *argv[]) {
   }
 
   // Main process
-  for (int j = 0; j < PROCESS_NUM + 1; j++) {
+  int j;
+  for (j = 0; j < PROCESS_NUM + 1; j++) {
     if (j != PROCESS_NUM) {
       close(pipes[j][0]);
     }
@@ -76,21 +79,20 @@ int main(int argc, char const *argv[]) {
   printf("Main process sent %d\n", y);
   if (write(pipes[0][1], &y, sizeof(int)) == -1) {
     printf("Error at writing\n");
-    return 5;
+    return 4;
   }
-
   if (read(pipes[PROCESS_NUM][0], &y, sizeof(int)) == -1) {
-    printf("Error at readingb\n");
-    return 6;
+    printf("Error at reading\n");
+    return 3;
   }
 
   printf("The final result is %d\n", y);
+
   close(pipes[0][1]);
   close(pipes[PROCESS_NUM][0]);
 
-  for (int i = 0; i < PROCESS_NUM; i++) {
+  for (i = 0; i < PROCESS_NUM; i++) {
     wait(NULL);
   }
-
   return 0;
 }
