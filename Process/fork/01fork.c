@@ -6,6 +6,8 @@ int main(int argc, char const *argv[]) {
   // printf("Hey it's fork e.g. 1, PID : %d\n", pid);
   fork();
   fork();
-  printf("Hello\n");
+  fork();
+  printf("Proccess Id: %d, parent Proccess %d\n", getpid(), getppid());
+  // printf("Hello\n");
   return 0;
 }
